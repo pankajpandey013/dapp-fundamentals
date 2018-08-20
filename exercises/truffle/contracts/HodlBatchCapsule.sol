@@ -11,13 +11,7 @@ contract HodlBatchCapsule {
     uint256 public unlockTime_;
 
     // Batch structure to define independent capsule
-    struct Batch {
-        address[] addresses;
-        uint256[] values;
-        uint256 unlockTime;
-        uint256 totalValue;
-    }
-    
+
     // Enable only single batch to be held per capsule by creating a private instance of the Batch struct
     // Structs may only be accessed internally and may not be defined as public
     Batch private batch_;
@@ -29,24 +23,7 @@ contract HodlBatchCapsule {
      * @notice will construct the parent contract and create a new BatchSend contract
      * @param _unlockTime how long before the capsule may be unlocked
      */
-    constructor(uint256 _unlockTime) public payable {
-        owner_ = msg.sender;
-        amount_ = msg.value;
-        unlockTime_ = now + _unlockTime;
-
-        // New batch send contract to leverage
-        batchSend_ = new BatchSend();
-    }
-
-    /*
-     * @notice will return the value to the user if it is the owner past the unlock time
-     */
-    // Withdraw the capsule amount, destroying this capsule
-    function withdraw() external {
-        require(msg.sender == owner_, "msg.sender != owner");
-        require(now >= unlockTime_, "Capsule not unlocked yet.");
-        selfdestruct(owner_);
-    }
+    //create the constructor function
 
     /*
      * @notice            Creates a new capsule batch struct if one doesn't yet exist
@@ -54,42 +31,32 @@ contract HodlBatchCapsule {
      * @param _values     How much to send to each address
      * @param _unlockTime How long to keep value locked
      */
-    function createBatch(
-        address[] _addresses, 
-        uint256[] _values,
-        uint256 _unlockTime
-    )   external 
-        payable
-    {
-        require(msg.sender == owner_, "msg.sender != owner");
+    // define createBatch()
+
+        //require that the user calling the function is the owner
+        
         // ensure that no batch already exists
-        require(batch_.addresses.length == 0, "batch already exists, try again later...");
+
         // create a Batch struct with filling all the variables 
-        batch_ = Batch(_addresses, _values, now + _unlockTime, msg.value);
-    }
+    
     /*
      * @notice will send the required values to the batchSend function after the unlock time
      */
-    // Withdraw the current batch, executing the tranfers
-    function withdrawBatch() external {
-        require(msg.sender == owner_, "msg.sender != owner");
-        require(batch_.addresses.length > 0, "batch does not exist");
-        require(now >= batch_.unlockTime, "Capsule not unlocked yet.");
+    // Define withdrawBatch() Withdraw the current batch, executing the tranfers
 
+        //require: only owner can call, the batch exists, the capsule is unlocked 
+        
         // Execute the batch, sending the eth from this contract
         // 1. call the .batchSend method of the batchSend_ contract instance
         // 2. the .value() of the call should be the .totalValue stored in the batch_ struct
         //    - this will send ether from this contract to the batchSend contract
         // 3. include the .addresses and .values from the batch_ struct
-        batchSend_.batchSend.value(batch_.totalValue)(batch_.addresses, batch_.values);
-    }   
 
     /*
      * @returns unlocktime   the time after which the funds are available for collection
      */
+    //Define batchUnlockTime() getter function
     // Structs are private so creating a getter to read batch unlockTime
-    function batchUnlockTime() external view returns(uint256) {
         // return the unlockTime from the batch_ struct
-        return batch_.unlockTime;
-    }
+
 }

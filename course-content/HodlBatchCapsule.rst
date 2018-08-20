@@ -1,30 +1,17 @@
-pragma solidity 0.4.24;
+==================
+Solidity Exercises
+==================
 
-// import the batch send functionalities from the contract to make all of its functions available to use
-import "./BatchSend.sol";
+1. `HODLBatch Exercise <https://raw.githubusercontent.com/Blockchain-Learning-Group/dapp-fundamentals/master/exercises/Voting_02.sol>`_
+=====================================================================================================================
 
+1.1 Copy the exercise over to `remix <https://remix.ethereum.org/#optimize=false&version=soljson-v0.4.24+commit.e67f0147.js>`_.
+------------------------------------
 
-contract HodlBatchCapsule {
-    // declare all the variables required for the capsule
-    address public owner_;
-    uint256 public amount_;
-    uint256 public unlockTime_;
-
-    // Batch structure to define independent capsule
-    struct Batch {
-        address[] addresses;
-        uint256[] values;
-        uint256 unlockTime;
-        uint256 totalValue;
-    }
-    
-    // Enable only single batch to be held per capsule by creating a private instance of the Batch struct
-    // Structs may only be accessed internally and may not be defined as public
-    Batch private batch_;
-
-    // Contract instance to send batch through
-    BatchSend public batchSend_;
-
+1.2 Create the constructor function
+--------------------------------------------
+ - 1.2a include the unlock time param get define other hodl variables 
+::
     /*
      * @notice will construct the parent contract and create a new BatchSend contract
      * @param _unlockTime how long before the capsule may be unlocked
@@ -33,11 +20,15 @@ contract HodlBatchCapsule {
         owner_ = msg.sender;
         amount_ = msg.value;
         unlockTime_ = now + _unlockTime;
-
-        // New batch send contract to leverage
-        batchSend_ = new BatchSend();
     }
+- 1.2b Create a new instance of BatchSend to use later
+::
+        batchSend_ = new BatchSend();
 
+1.3 Create the createBatch function
+--------------------------------------------
+-1.3a Define the createBatch payable and external function
+::
     /*
      * @notice            Creates a new capsule batch struct if one doesn't yet exist
      * @param _addresses  Who to send the batch to 
@@ -57,6 +48,10 @@ contract HodlBatchCapsule {
         // create a Batch struct with filling all the variables 
         batch_ = Batch(_addresses, _values, now + _unlockTime, msg.value);
     }
+
+1.4 Create the withdrawBatch() function
+--------------------------------------------
+::
     /*
      * @notice will send the required values to the batchSend function after the unlock time
      */
@@ -74,6 +69,9 @@ contract HodlBatchCapsule {
         batchSend_.batchSend.value(batch_.totalValue)(batch_.addresses, batch_.values);
     }   
 
+1.5 Create the batchUnlockTime function
+--------------------------------------------
+::
     /*
      * @returns unlocktime   the time after which the funds are available for collection
      */
@@ -82,4 +80,3 @@ contract HodlBatchCapsule {
         // return the unlockTime from the batch_ struct
         return batch_.unlockTime;
     }
-}
