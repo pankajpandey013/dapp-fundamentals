@@ -1,9 +1,12 @@
 pragma solidity ^0.4.24;
 
-
 contract BatchSend {
     event BatchSent(address[] addresses);
 
+    /*
+     * @param _addresses  Array of addresses that will be recieving value
+     * @param _values     Corresponding arr of how much value each will be recieving
+     */
     function batchSend(
         address[] _addresses, 
         uint256[] _values
